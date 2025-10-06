@@ -2,6 +2,7 @@
 postgresqlコンテナテンプレート
 
 # ディレクトリ構成
+```sh
 .
 ├── compose.yml
 ├── data
@@ -10,3 +11,4 @@ postgresqlコンテナテンプレート
 ├── pgadmin_servers.json
 ├── pgadmin-data
 └── postgresql.conf
+```
