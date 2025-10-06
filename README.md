@@ -33,11 +33,16 @@ docker compose logs -f pgadmin4
 
 # コンテナ内に入ってpsql起動
 docker compose exec -it db /bin/sh -lc 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
-
+```
 - pgAdminでdbに接続する
 pgAdminは、postgresql専用GUI制御ソフト
 http://localhost:8083/browser/
 Servers>dbを選択。ログインパスワードが求められるので.envのパスワードを入れる。
 
+## Third-Party
+This template uses official Docker images:
+- PostgreSQL — PostgreSQL License (https://www.postgresql.org/about/licence/)
+- pgAdmin 4 — PostgreSQL License (https://www.pgadmin.org/licence/)
 
-```
+Images are pulled at runtime; no third-party binaries are bundled in this repository.
+
