@@ -1,5 +1,8 @@
-# 個人用
-postgresqlコンテナテンプレート
+# 個人用postgresqlコンテナテンプレート
+
+- postgresql17
+- pgadmin4
+  
 
 # ディレクトリ構成
 ```sh
