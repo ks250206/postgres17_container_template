@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:17
+    container_name: mypg
+    # 必要なら外す：ホストのUID/GIDに合わせて権限調整（Debian系は 999:999 が多い）
+    user: "999:999"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+      TZ: ${TZ}
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./logs:/var/log/postgresql            # ← postgresql.conf の log_directory と一致
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      # SELinux 有効な環境なら末尾に :Z を付与（例： ./logs:/var/log/postgresql:Z）
+      # 初期化SQLを置く場合（任意）:
+      # - ./init/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      # - ./init/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h 127.0.0.1 -p 5432 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    # コンテナのメモリ上限を厳密に縛る場合（Compose v2では deploy.resources 推奨）
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 2g
+
+  pgadmin4:
+    image: dpage/pgadmin4:9.8.0
+    container_name: mypgadmin
+    ports:
+      - "8083:80"
+    volumes:
+      - ./pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin_servers.json:/pgadmin4/servers.json:ro
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      TZ: ${TZ}
+    depends_on:
+      - db
+    restart: unless-stopped
+
+# 任意：ネットワーク定義（デフォルトbridgeで十分なら不要）
+# networks:
+#   default:
+#     name: pgnet
